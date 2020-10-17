@@ -1,0 +1,4 @@
+{
+    "mongoURI": "mongodb+srv://Fir3_-boi:0E7AkXwkeNZkqY4X@devconnector.fy68d.mongodb.net/devconnector?retryWrites=true&w=majority",
+    "jwtSecret": "38498dhfhf833737fbf873"
+}
