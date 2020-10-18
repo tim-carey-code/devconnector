@@ -1,4 +1,6 @@
 const express = require("express");
+const request = require("request");
+const config = require("config");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
@@ -36,7 +38,7 @@ router.post(
     auth,
     [
       check("status", "Status Is Required").not().isEmpty(),
-      check("skills", "Skills is required").not().isEmpty(),
+      check("skills", "Skills Is Required").not().isEmpty(),
     ],
   ],
   async (req, res) => {
@@ -134,7 +136,7 @@ router.get("/user/:user_id", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(400).json({ msg: "Profile not found" });
+      return res.status(400).json({ msg: "Profile Not Found" });
     }
     res.status(500).send("Server Error");
   }
@@ -167,8 +169,8 @@ router.put(
     auth,
     [
       check("title", "Title is Required").not().isEmpty(),
-      check("company", "Company is required").not().isEmpty(),
-      check("from", "From date is required").not().isEmpty(),
+      check("company", "Company is Required").not().isEmpty(),
+      check("from", "From date is Required").not().isEmpty(),
     ],
   ],
   async (req, res) => {
@@ -294,6 +296,33 @@ router.delete("/education/:edu_id", auth, async (req, res) => {
 
     await profile.save();
     res.json(profile);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+router.get("/github/:username", async (req, res) => {
+  try {
+    const options = {
+      uri: `https://api.github.com/users/${
+        req.params.username
+      }/repos?per_page=5&sort=created:asc&client_id=${config.get(
+        "githubClientID"
+      )}&client_secret=${config.get("githubSecret")}`,
+      method: "GET",
+      headers: { "user-agent": "node.js" },
+    };
+
+    request(options, (error, response, body) => {
+      if (error) console.error(error);
+
+      if (response.statusCode !== 200) {
+        return res.status(404).json({ msg: "No Github profile found" });
+      }
+
+      res.json(JSON.parse(body));
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
